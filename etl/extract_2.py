@@ -5,7 +5,7 @@ import time
 
 df = pd.read_json("data/raw/steamspy_raw.json")
 df = df.T
-app_ids = df["appid"].head(10)
+app_ids = df["appid"]
 
 games = []
 for id in app_ids:
