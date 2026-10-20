@@ -17,7 +17,6 @@ DB_CONFIG = {
 
 warnings.filterwarnings("ignore", message="pandas only supports SQLAlchemy")
 
-
 table_names = ['dim_game', 'dim_user_tag', 'dim_month', 'fact_user_tag', 'fact_monthly_players']
 for table_name in table_names:
     QUERY = f"SELECT * FROM {table_name}"
