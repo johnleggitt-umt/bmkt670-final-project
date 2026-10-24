@@ -9,7 +9,7 @@ CREATE TABLE dim_game (
 	app_id			INTEGER			PRIMARY KEY,
 	game_name		TEXT			NOT NULL,
 	release_date	DATE			NOT NULL CHECK (release_date >= '2012-07-01'),
-	initial_cost	NUMERIC(5,2)	NOT NULL CHECK (initial_cost >= 0),
+	initial_cost	NUMERIC(5,2)	NOT NULL CHECK,
 );
 
 -- one row = one user tag
