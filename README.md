@@ -27,4 +27,4 @@ One row in my ML feature table = one video game.
 
 
 ## AI Usage
-Claude (Anthropic) was used to explain how the Steam Store API, SteamSpy API, and SteamCharts pages are structured, to help write and debug the extract scripts (requests, JSON handling, BeautifulSoup parsing, and error handling), and to review the schema and field-source documentation.
+Claude (Anthropic) was used to explain how the Steam Store API, SteamSpy API, and SteamCharts pages are structured, to help write and debug the extract scripts (requests, JSON handling, BeautifulSoup parsing, and error handling), and to review the schema and field-source documentation. Additionally, Claude was used to generate that code in `transform.py` that builds the ML Features table from the dimension and fact tables.
