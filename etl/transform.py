@@ -73,16 +73,16 @@ for tag in df_steamspy_tags["response"].str.get("tags"):
             tags.append(tag_name)
 
 tags = set(tags)
-dim_user_tags = pd.DataFrame(tags).rename(columns={0: "tag_name"})
-dim_user_tags = dim_user_tags.sort_values("tag_name").reset_index(drop=True)
-dim_user_tags["user_tag_id"] = range(1, len(dim_user_tags) + 1)
+dim_user_tag = pd.DataFrame(tags).rename(columns={0: "tag_name"})
+dim_user_tag = dim_user_tag.sort_values("tag_name").reset_index(drop=True)
+dim_user_tag["user_tag_id"] = range(1, len(dim_user_tag) + 1)
 
 # Printing results
-print("dim_user_tags:")
-dim_user_tags = dim_user_tags[["user_tag_id", "tag_name"]]
-print(f"{len(dim_user_tags)} rows in dim_user_tags.")
-dim_user_tags.to_csv("data/clean/dim_user_tags.csv", index=False)
-print("dim_user_tags saved as data/clean/dim_user_tags.csv:")
+print("dim_user_tag:")
+dim_user_tag = dim_user_tag[["user_tag_id", "tag_name"]]
+print(f"{len(dim_user_tag)} rows in dim_user_tag")
+dim_user_tag.to_csv("data/clean/dim_user_tag.csv", index=False)
+print("dim_user_tag saved as data/clean/dim_user_tag.csv:")
 print("")
 
 # Building dim_month table
@@ -116,13 +116,16 @@ fact_user_tag["app_id"] = df_steamspy_tags["appid"]
 fact_user_tag = fact_user_tag.melt(id_vars="app_id")
 fact_user_tag = fact_user_tag.rename(columns={"variable": "tag_name","value": "user_tag_votes"})
 fact_user_tag["user_tag_votes"] = fact_user_tag["user_tag_votes"]
-fact_user_tag = fact_user_tag.merge(dim_user_tags, on="tag_name", how="left").drop(columns=["tag_name"])
+fact_user_tag = fact_user_tag.merge(dim_user_tag, on="tag_name", how="left").drop(columns=["tag_name"])
 
 # Printing results
 print("fact_user_tag:")
 fact_user_tag = fact_user_tag[["app_id", "user_tag_id", "user_tag_votes"]]
 print(f"Dropped {len(fact_user_tag[fact_user_tag["user_tag_votes"].isna()])} rows of {len(fact_user_tag)} total rows from fact_user_tag due to receiving zero votes.")
 fact_user_tag = fact_user_tag.dropna(subset="user_tag_votes")
+in_dim_game = fact_user_tag["app_id"].isin(dim_game["app_id"])
+print(f"Dropped {len(fact_user_tag) - in_dim_game.sum()} rows of {len(fact_user_tag)} remaining rows from fact_user_tag due to games not in dim_game.")
+fact_user_tag = fact_user_tag[in_dim_game]
 print(f"{len(fact_user_tag)} remianing rows in fact_user_tag.")
 fact_user_tag.to_csv("data/clean/fact_user_tag.csv", index=False)
 print("fact_user_tag saved as data/clean/fact_user_tag.csv:")
@@ -144,10 +147,79 @@ fact_monthly_players = fact_monthly_players.drop(columns=["release_date"])
 
 # Printing results
 print("fact_monthly_players:")
-fact_monthly_players = fact_monthly_players[["app_id", "month_id", "months_released", "avg_players", "peak_players"]]
-print(f"Dropped {len(fact_monthly_players[fact_monthly_players["months_released"].isna()])} rows of {len(fact_monthly_players)} total rows from fact_monthly_players due to missing release dates.")
+fact_monthly_players = fact_monthly_players[["app_id", "month_id", "avg_players", "peak_players", "months_released"]]
+print(f"Dropped {len(fact_monthly_players[fact_monthly_players["months_released"].isna()])} rows of {len(fact_monthly_players)} total rows from fact_monthly_players due to missing release dates in dim_game.")
 fact_monthly_players = fact_monthly_players.dropna(subset="months_released")
 print(f"{len(fact_monthly_players)} remianing rows in fact_monthly_players.")
 fact_monthly_players.to_csv("data/clean/fact_monthly_players.csv", index=False)
 print("fact_user_tag saved as data/clean/fact_monthly_players.csv:")
+print("")
+
+
+# ---------------------------------------------------------------------------
+# AI-generated code: the section below was written by Claude (Anthropic)
+# to build the ml_features_player_retention table. Reviewed and run by John.
+# ---------------------------------------------------------------------------
+
+# Building ml_features_player_retention table
+
+# Average players at months 1, 12, and 36, one column each
+key_months = fact_monthly_players[fact_monthly_players["months_released"].isin([1, 12, 36])]
+avg_players = key_months.pivot_table(index="app_id", columns="months_released", values="avg_players")
+avg_players = avg_players.rename(columns={1: "month1_avg_players", 12: "month12_avg_players", 36: "month36_avg_players"})
+avg_players = avg_players.reset_index()
+
+# Peak players in month 1
+month1_peak = fact_monthly_players[fact_monthly_players["months_released"] == 1][["app_id", "peak_players"]]
+month1_peak = month1_peak.rename(columns={"peak_players": "month1_peak_players"})
+
+# Start from dim_game and join the player counts
+ml_features = dim_game[["app_id", "release_date", "initial_cost"]].copy()
+ml_features["release_year"] = ml_features["release_date"].dt.year
+ml_features = ml_features.merge(avg_players, on="app_id")
+ml_features = ml_features.merge(month1_peak, on="app_id")
+
+# Keep games that have all three months (no month 36 = nothing to learn from)
+ml_features = ml_features.dropna(subset=["month1_avg_players", "month12_avg_players", "month36_avg_players"])
+ml_features = ml_features[ml_features["month1_avg_players"] > 0]   # can't divide by zero below
+
+# Derived features
+ml_features["m1_to_m12_retention"] = ml_features["month12_avg_players"] / ml_features["month1_avg_players"]
+ml_features["m1_peak_m1_avg_ratio"] = ml_features["month1_peak_players"] / ml_features["month1_avg_players"]
+
+# One-hot encoded top 10 user tags (1 = game has the tag, 0 = it doesn't)
+top_tags = {
+    "Singleplayer": "tag_singleplayer",
+    "Action": "tag_action",
+    "Multiplayer": "tag_multiplayer",
+    "Adventure": "tag_adventure",
+    "Atmospheric": "tag_atmospheric",
+    "Co-op": "tag_co_op",
+    "Open World": "tag_open_world",
+    "Indie": "tag_indie",
+    "RPG": "tag_rpg",
+    "First-Person": "tag_first_person",
+}
+game_tags = fact_user_tag.merge(dim_user_tag, on="user_tag_id")
+game_tags = game_tags[game_tags["tag_name"].isin(top_tags.keys())]
+tag_onehot = pd.crosstab(game_tags["app_id"], game_tags["tag_name"]).rename(columns=top_tags).reset_index()
+
+ml_features = ml_features.merge(tag_onehot, on="app_id", how="left")
+tag_columns = list(top_tags.values())
+ml_features[tag_columns] = ml_features[tag_columns].fillna(0).astype(int)
+
+# Split by release year
+ml_features["split"] = "train"
+ml_features.loc[ml_features["release_year"].between(2020, 2021), "split"] = "validate"
+ml_features.loc[ml_features["release_year"] >= 2022, "split"] = "test"
+
+# Printing results
+print("ml_features_player_retention:")
+ml_features = ml_features[["app_id", "release_year", "initial_cost",
+                           "month1_avg_players", "month1_peak_players", "month12_avg_players", "month36_avg_players",
+                           "m1_to_m12_retention", "m1_peak_m1_avg_ratio"] + tag_columns + ["split"]]
+print(f"{len(ml_features)} rows in ml_features_player_retention.")
+print(ml_features["split"].value_counts())
+ml_features.to_csv("data/clean/ml_features_player_retention.csv", index=False)
+print("ml_features_player_retention saved as data/clean/ml_features_player_retention.csv")
 print("")

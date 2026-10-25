@@ -3,13 +3,14 @@ DROP TABLE IF EXISTS dim_user_tag CASCADE;
 DROP TABLE IF EXISTS dim_month CASCADE;
 DROP TABLE IF EXISTS fact_user_tag CASCADE;
 DROP TABLE IF EXISTS fact_monthly_players CASCADE;
+DROP TABLE IF EXISTS ml_features_player_retention CASCADE;
 
 -- one row = one game
 CREATE TABLE dim_game (
 	app_id			INTEGER			PRIMARY KEY,
 	game_name		TEXT			NOT NULL,
-	release_date	DATE			NOT NULL CHECK (release_date >= '2012-07-01'),
-	initial_cost	NUMERIC(5,2)	NOT NULL CHECK,
+	release_date	DATE			NOT NULL,
+	initial_cost	NUMERIC(5,2)	NOT NULL
 );
 
 -- one row = one user tag
@@ -46,3 +47,28 @@ CREATE TABLE fact_monthly_players (
 	FOREIGN KEY		(app_id)		REFERENCES dim_game(app_id),
 	FOREIGN KEY		(month_id)		REFERENCES dim_month(month_id)
 );
+
+-- one row = one game
+CREATE TABLE ml_features_player_retention (
+	app_id					INTEGER			PRIMARY KEY,
+	release_year			INTEGER			NOT NULL,
+	initial_cost			NUMERIC(5,2)	NOT NULL,
+	month1_avg_players		NUMERIC(10,2)	NOT NULL,
+	month1_peak_players 	INTEGER			NOT NULL,
+	month12_avg_players		NUMERIC(10,2)	NOT NULL,
+	month36_avg_players		NUMERIC(10,2)	NOT NULL,
+	m1_to_m12_retention		NUMERIC			NOT NULL,
+	m1_peak_m1_avg_ratio	NUMERIC			NOT NULL,
+	tag_singleplayer		INTEGER			NOT NULL,
+	tag_action				INTEGER			NOT NULL,
+	tag_multiplayer			INTEGER			NOT NULL,
+	tag_adventure			INTEGER			NOT NULL,
+	tag_atmospheric			INTEGER			NOT NULL,
+	tag_co_op				INTEGER			NOT NULL,
+	tag_open_world			INTEGER			NOT NULL,
+	tag_indie				INTEGER			NOT NULL,
+	tag_rpg					INTEGER			NOT NULL,
+	tag_first_person		INTEGER			NOT NULL,
+	split					TEXT			NOT NULL CHECK (split IN ('train', 'validate', 'test')),
+	FOREIGN KEY				(app_id)		REFERENCES dim_game(app_id)
+	);
