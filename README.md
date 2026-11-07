@@ -18,12 +18,13 @@ One row in my ML feature table = one video game.
 
 
 ## How to Run
-1. Create and activate a virtual environment
-2. Install packages: pip install -r requirements.txt
-3. Create a .env file with your API keys and DB_PASSWORD 
-4. Pull the data: run each script in etl/ in numerical number (e.g. extract_1.py first, extract_2.py second, etc.)
-5. Build the database: run sql/schema.sql in pgAdmin or psql
-6. Confirm it worked: python db_check.py (should print all table names)
+1. Create and activate a virtual environment.
+2. Install packages: pip install -r requirements.txt.
+3. Build the database: create empty daatabase and run sql/schema.sql in pgAdmin.
+4. Create a .env file with your PGHOST, PGPORT, PGDATABASE, PGUSER, and PGPASSWORD.
+5. Run `run_pipeline.py` from the project folder.
+    - Runs extract, transform, load, quality checks, and the model, in that order.
+    - Extract scripts take hours to run, and they are skipped by default. To pull fresh data, set `run_extract_steps = True` in `run_pipeline.py` .
 
 
 ## AI Usage

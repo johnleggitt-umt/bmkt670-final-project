@@ -37,3 +37,9 @@
 | ml_features_player_retention | tag_rpg | fact_user_tag | one-hot encoding | Feature |
 | ml_features_player_retention | tag_first_person | fact_user_tag | one-hot encoding | Feature |
 | ml_features_player_retention | split | Created in Python | See above in release_date | Split |
+| predictions | app_id | Joined | app_id from ml_features_player_retention | Key |
+| predictions | split | Joined | split from ml_features_player_retention | Split data for model |
+| predictions | actual | Joined | month36_avg_players from ml_features_player_retention | Target |
+| predictions | predicted | Calculated in Python | Random forest prediction of month36_avg_players | Model's prediction |
+| predictions | error | Calculated in Python | actual minus predicted | Shows how far off each prediction was |
+| predictions | model_name | Created in Python | Set to "random_forest" for every row | Labels which model made the prediction |
