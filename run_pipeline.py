@@ -9,13 +9,17 @@ extract_steps = [
     "etl/extract_1.py",         # extract: SteamSpy top 2000 games
     "etl/extract_2.py",         # extract: Extract SteamWorks info for those 2000 games
     "etl/extract_3.py",         # extract: Extract SteamCharts info for those 2000 games
-    "etl/extract_4.py",          # extract: Extract SteamSpy detailed info for those 2000 games
+    "etl/extract_4.py",         # extract: Extract SteamSpy detailed info for those 2000 games
 ]
 
 transform_steps = [
     "etl/transform.py",         # clean, match keys, reshape, build features
     "etl/load.py",              # empty tables, then load into Postgres
     "etl/quality_checks.py",    # print PASS/FAIL for each check
+]
+
+model_steps = [
+    "model/train_model.py",     # build models and predictions table
 ]
 
 if run_extract_steps:
@@ -32,6 +36,15 @@ else:
 
 print("Running Data Transformation steps:")
 for step in transform_steps:
+    print(f"\n=== Running {step} ===")
+    result = subprocess.run([sys.executable, step])
+
+    if result.returncode != 0:
+        print(f"\nStopped: {step} failed. Fix it and run again.")
+        sys.exit(1)
+
+print("Running Modeling steps:")
+for step in model_steps:
     print(f"\n=== Running {step} ===")
     result = subprocess.run([sys.executable, step])
 
