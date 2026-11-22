@@ -21,11 +21,11 @@ One row in my ML feature table = one video game.
 1. Create and activate a virtual environment.
 2. Install packages: pip install -r requirements.txt.
 3. Build the database: create empty daatabase and run sql/schema.sql in pgAdmin.
-4. Create a .env file with your PGHOST, PGPORT, PGDATABASE, PGUSER, and PGPASSWORD.
+4. Create a .env file with your PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD, and ANTHROPIC_API_KEY.
 5. Run `run_pipeline.py` from the project folder.
     - Runs extract, transform, load, quality checks, and the model, in that order.
     - Extract scripts take hours to run, and they are skipped by default. To pull fresh data, set `run_extract_steps = True` in `run_pipeline.py` .
 
 
 ## AI Usage
-Claude (Anthropic) was used to explain how the Steam Store API, SteamSpy API, and SteamCharts pages are structured, to help write and debug the extract scripts (requests, JSON handling, BeautifulSoup parsing, and error handling), and to review the schema and field-source documentation. Additionally, Claude was used to generate that code in `transform.py` that builds the ML Features table from the dimension and fact tables.
+Claude (Anthropic) was used to explain how the Steam Store API, SteamSpy API, and SteamCharts pages are structured, to help write and debug the extract scripts (requests, JSON handling, BeautifulSoup parsing, and error handling), and to review the schema and field-source documentation. Additionally, Claude was used to generate the code in `transform.py` that builds the ML Features table from the dimension and fact tables.

@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS fact_user_tag CASCADE;
 DROP TABLE IF EXISTS fact_monthly_players CASCADE;
 DROP TABLE IF EXISTS ml_features_player_retention CASCADE;
 DROP TABLE IF EXISTS predictions CASCADE;
+DROP TABLE IF EXISTS ai_summaries CASCADE;
 
 -- one row = one game
 CREATE TABLE dim_game (
@@ -74,6 +75,7 @@ CREATE TABLE ml_features_player_retention (
 	FOREIGN KEY				(app_id)		REFERENCES dim_game(app_id)
 	);
 
+-- one row = one game
 CREATE TABLE predictions (
 	app_id		INTEGER			PRIMARY KEY,
 	split		TEXT			NOT NULL CHECK (split IN ('train', 'validate', 'test')),
@@ -81,5 +83,13 @@ CREATE TABLE predictions (
 	predicted	NUMERIC(10,2)	NOT NULL,
 	error		NUMERIC(10,2)	NOT NULL,
 	model_name	TEXT			NOT NULL,
+	FOREIGN KEY		(app_id)		REFERENCES ml_features_player_retention(app_id)
+);
+
+-- one row = one game
+CREATE TABLE ai_summaries (
+	app_id		INTEGER			PRIMARY KEY,
+	summary		TEXT			NOT NULL,
+	created_at	TIMESTAMP		NOT NULL DEFAULT NOW(),
 	FOREIGN KEY		(app_id)		REFERENCES ml_features_player_retention(app_id)
 );

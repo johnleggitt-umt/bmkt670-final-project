@@ -20,6 +20,7 @@ transform_steps = [
 
 model_steps = [
     "model/train_model.py",     # build models and predictions table
+    "ai/generate_summaries.py", # generate AI summaries for predictions
 ]
 
 if run_extract_steps:

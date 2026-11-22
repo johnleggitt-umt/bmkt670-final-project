@@ -11,6 +11,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 from psycopg2.extras import execute_values
+import joblib
 
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
@@ -169,3 +170,8 @@ conn.commit()
 conn.close()
 
 print(f"Saved {len(predictions)} predictions to the predictions table")
+print("")
+
+# Saved model
+joblib.dump(forest, "model/player_model.joblib")
+print("Saved model to model/player_model.joblib")
