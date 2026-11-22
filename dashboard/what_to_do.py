@@ -44,7 +44,7 @@ st.subheader("Recommendations")
 
 # Recommendations
 st.success("**1. Put the most support into launch, then scale down after six months.** Player counts level at around six months after launch (Page 1). " \
-"The first few months are when servers and support are the most important")
+"The first few months are when servers and support are the most important.")
 
 st.success("**2. Make the year-three call at month 12, not at launch.** Games that hold players at month 12 tend to hold them at month 36. (Page 1) " \
 "The one-year mark is the right time to decide whether to invest (DLC, expansions, etc) or to wind down.")
