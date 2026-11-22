@@ -22,7 +22,13 @@ DB_CONFIG = {
 
 conn = psycopg2.connect(**DB_CONFIG)
 
-# Querying and processing data
+# Creating dashboard page
+st.title("What Happened?")
+st.caption("This page shows how player counts changed during the first three years after a video game's launch on Steam."
+"Values show the median game's average concurrent players.")
+
+
+# Querying and processing data and creating filter
 query = """
     SELECT f.app_id, f.months_released, f.avg_players, g.release_date
     FROM fact_monthly_players f
@@ -40,11 +46,6 @@ max_year = int(df["release_year"].max())
 years = st.slider("Release year", min_year, max_year, (min_year, max_year))
 
 df = df[(df["release_year"] >= years[0]) & (df["release_year"] <= years[1])]
-
-# Creating dashboard page
-st.title("What Happened?")
-st.caption("This page shows how player counts changed during the first three years after a video game's launch on Steam."
-"Values show the median game's average concurrent players.")
 
 # KPIs
 k1, k2, k3, k4 = st.columns(4)
