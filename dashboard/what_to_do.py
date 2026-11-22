@@ -34,7 +34,7 @@ WHERE split = 'test'
 df = pd.read_sql(query, conn)
 test_mae = mean_absolute_error(df["actual"], df["predicted"])
 
-model = joblib.load(Path(__file__).resolve().parent.parent / "data" / "clean" / "player_model.joblib")
+model = joblib.load(Path(__file__).resolve().parent.parent / "model" / "player_model.joblib")
 
 # Creating dashboard page
 st.title("What Should We Do?")

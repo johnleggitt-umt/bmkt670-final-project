@@ -3,3 +3,4 @@
 data/raw/
 data/clean/
 __pycache__/
+model/player_model.joblib

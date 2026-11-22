@@ -173,5 +173,5 @@ print(f"Saved {len(predictions)} predictions to the predictions table")
 print("")
 
 # Saved model
-joblib.dump(forest, "data/clean/player_model.joblib")
-print("Saved model to data/clean/player_model.joblib")
+joblib.dump(forest, "model/player_model.joblib")
+print("Saved model to model/player_model.joblib")
